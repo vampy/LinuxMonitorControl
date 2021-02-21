@@ -43,8 +43,14 @@ const featureCodeContrast = 12
 
 // We depend on https://www.ddcutil.com/
 func getBinaryPath() string {
+	localNear := "./ddcutil"
+	_, err := exec.LookPath(localNear)
+	if err == nil {
+		return localNear
+	}
+
 	local := "./ddcutil/bin/ddcutil"
-	_, err := exec.LookPath(local)
+	_, err = exec.LookPath(local)
 	if err == nil {
 		return local
 	}
