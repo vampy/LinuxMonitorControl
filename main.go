@@ -16,6 +16,7 @@ import (
 var brightness = flag.Int("brightness", 0, "brightness of all the monitors")
 
 func main() {
+
 	flag.Parse()
 	flagset := make(map[string]bool)
 	flag.Visit(func(f *flag.Flag) { flagset[f.Name] = true })
@@ -25,11 +26,12 @@ func main() {
 	// 	os.Exit(1)
 	// }
 
+	build.Print()
+
 	ddc, err := ddc.New()
 	if err != nil {
 		panic(err)
 	}
-	build.Print()
 	fmt.Printf("%v\n\n", ddc)
 
 	numDisplays := xorg.NumActiveDisplays()

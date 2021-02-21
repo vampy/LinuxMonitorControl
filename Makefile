@@ -38,6 +38,12 @@ init:
 	go mod download
 	@echo ""
 
+dependencies:
+## ddcutil: Download & ddcutil ddcutil
+	@echo "Building and downloading ddcutil:"
+	./ddcutil/build.sh
+	@echo ""
+
 tidy:
 ## tidy: Run go modules tidy
 	go mod tidy -v

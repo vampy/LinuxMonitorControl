@@ -12,6 +12,13 @@ import (
 	"github.com/vampy/LinuxMonitorControl/pkg/xorg"
 )
 
+/*
+#cgo CFLAGS: -I./ddcutil/src/src/
+#cgo LDFLAGS: -L./ddcutil/lib -lddcutil -Wl,-rpath=./ddcutil/lib
+
+#include "ddcutil_c_api.h"
+*/
+
 // https://www.ddcutil.com/command_getvcp/
 type Value struct {
 	FeatureCode  string
@@ -35,7 +42,21 @@ const featureCodeBrightness = 10
 const featureCodeContrast = 12
 
 // We depend on https://www.ddcutil.com/
-const ddcutilPath = "ddcutil"
+func getBinaryPath() string {
+	local := "./ddcutil/bin/ddcutil"
+	_, err := exec.LookPath(local)
+	if err == nil {
+		return local
+	}
+
+	system := "ddcutil"
+	_, err = exec.LookPath(system)
+	if err == nil {
+		return system
+	}
+
+	return system
+}
 
 func runCommand(name string, arg ...string) (string, error) {
 	cmd := exec.Command(name, arg...)
@@ -58,6 +79,11 @@ func (d *DDC) String() string {
 }
 
 func New() (*DDC, error) {
+	// cVersion := C.ddca_ddcutil_version_string()
+	// version := C.GoString(cVersion)
+	// fmt.Println(version)
+
+	ddcutilPath := getBinaryPath()
 	_, err := exec.LookPath(ddcutilPath)
 	if err != nil {
 		return nil, err
@@ -139,13 +165,14 @@ func (d *DDC) Displays() map[int]*Display {
 func (d *DDC) SetBrightness(displayIndex int, brightness int) error {
 	_, ok := d.displays[displayIndex]
 	if ok {
+		ddcutilPath := getBinaryPath()
 		_, err := exec.LookPath(ddcutilPath)
 		if err != nil {
 			return err
 		}
 
 		_, err = runCommand(
-			"ddcutil",
+			ddcutilPath,
 			"--display", strconv.Itoa(displayIndex),
 			"setvcp", strconv.Itoa(featureCodeBrightness), strconv.Itoa(brightness))
 		if err != nil {
