@@ -194,6 +194,27 @@ func (d *DDC) SetBrightness(displayIndex int, brightness int) error {
 	return nil
 }
 
+func (d *DDC) SetContrast(displayIndex int, brightness int) error {
+	_, ok := d.displays[displayIndex]
+	if ok {
+		ddcutilPath := getBinaryPath()
+		_, err := exec.LookPath(ddcutilPath)
+		if err != nil {
+			return err
+		}
+
+		_, err = runCommand(
+			ddcutilPath,
+			"--display", strconv.Itoa(displayIndex),
+			"setvcp", strconv.Itoa(featureCodeContrast), strconv.Itoa(brightness))
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // def get_laptop_display_brightness():
 //     return int(float(run_command("xbacklight -get").strip()))
 
