@@ -137,11 +137,3 @@ func (b *Backlight) SetAll(brightness int) {
 		fmt.Printf("Xorg: Output = %d, Current = %d, New = %d\n", i, int(currentNormalized), int(newNormalized))
 	}
 }
-
-func primaryOutput(x *xgbutil.XUtil) (randr.Output, error) {
-	primary, err := randr.GetOutputPrimary(x.Conn(), x.RootWin()).Reply()
-	if err != nil {
-		return 0, err
-	}
-	return primary.Output, nil
-}

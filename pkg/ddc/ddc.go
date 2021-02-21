@@ -167,10 +167,6 @@ func (d *DDC) SetBrightness(displayIndex int, brightness int) error {
 	return nil
 }
 
-// def set_laptop_display_brightness(brightness):
-//     # Monitor laptop screen, is intel, we can use xbacklight
-//     run_command(f"xbacklight -set {brightness}")
-
 // def get_laptop_display_brightness():
 //     return int(float(run_command("xbacklight -get").strip()))
 

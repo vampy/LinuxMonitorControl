@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 
 	"github.com/vampy/LinuxMonitorControl/pkg/build"
 	"github.com/vampy/LinuxMonitorControl/pkg/ddc"
 	"github.com/vampy/LinuxMonitorControl/pkg/xorg"
+	"golang.org/x/sync/errgroup"
 )
 
 // TODO systray https://www.reddit.com/r/golang/comments/bh0p2h/go_and_the_linux_system_tray/
@@ -34,11 +36,18 @@ func main() {
 	fmt.Printf("NumDisplays = %d\n\n", numDisplays)
 	if flagset["brightness"] {
 		fmt.Printf("Using brightness = %d\n\n", *brightness)
+
+		errs, _ := errgroup.WithContext(context.Background())
 		for i := 0; i < numDisplays; i++ {
-			err := ddc.SetBrightness(i, *brightness)
-			if err != nil {
-				panic(err)
-			}
+			i := i
+			errs.Go(func() error {
+				return ddc.SetBrightness(i, *brightness)
+			})
+		}
+
+		err := errs.Wait()
+		if err != nil {
+			panic(err)
 		}
 	}
 }
