@@ -20,3 +20,15 @@ make build
 # Set contrast only on monitor 1
 ./LinuxMonitorControl -c 50 -d 1
 ```
+
+
+## Build local ddcutil
+
+See required dependencies [here](https://www.ddcutil.com/building/)
+
+```bash
+make dependencies
+
+# If build succeeds
+./ddcutil/bin/ddcutil detect
+```
