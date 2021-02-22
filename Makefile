@@ -1,11 +1,16 @@
-PROJECTNAME := "$(shell basename "$(PWD)")"
+BASE_PATH := "$(shell pwd)"
 
-GOBASE := "$(shell pwd)"
-GOBIN := $(GOBASE)
+DDCUTIL_BASE_PATH := $(BASE_PATH)/ddcutil
+DDCUTIL_BIN_PATH := $(DDCUTIL_BASE_PATH)/bin/ddcutil
+
+BIN_BASE_PATH := $(BASE_PATH)
+BIN_NAME := LinuxMonitorControl
+BIN_PATH := $(BIN_BASE_PATH)/$(BIN_NAME)
 
 # Strips the binary out of the symbol table and debug information
 # https://lukeeckley.com/post/useful-go-build-flags/
 LDFLAGS_RELEASE ?= -s -w
+export LDFLAGS ?=
 
 # Build time in UTC time
 BUILD_TIME ?= $(shell date --utc +"%Y.%m.%d.%H%M")
@@ -22,15 +27,12 @@ ifdef WITH_RACE
 	GO_RACE := -race
 endif
 
-GO_BUILD_COMMAND := go build -v -ldflags "\
+GO_BUILD_COMMAND := go build -v -ldflags "$(LDFLAGS)\
 	-X '$(IMPORT_PATH_BASE)/pkg/build.GitBranch=$(GIT_BRANCH)' \
 	-X '$(IMPORT_PATH_BASE)/pkg/build.GitCommit=$(GIT_COMMIT)' \
 	-X '$(IMPORT_PATH_BASE)/pkg/build.BuildTime=$(BUILD_TIME)'"\
 	$(GO_RACE) \
 	-o
-
-# Stop annying warnings https://github.com/mattn/go-sqlite3/issues/803
-export CGO_CFLAGS ?= -Wno-return-local-addr
 
 init:
 ## install: Run go modules download
@@ -41,7 +43,7 @@ init:
 dependencies:
 ## ddcutil: Download & ddcutil ddcutil
 	@echo "Building and downloading ddcutil:"
-	./ddcutil/build.sh
+	$(DDCUTIL_BASE_PATH)/build.sh
 	@echo ""
 
 tidy:
@@ -55,8 +57,12 @@ build-packages:
 build: init
 ## build: Builds the binary
 	@echo "Building:"
-	$(GO_BUILD_COMMAND) "$(GOBIN)/LinuxMonitorControl" main.go || exit 1
+	$(GO_BUILD_COMMAND) $(BIN_PATH) main.go || exit 1
 	@echo ""
+
+build-release:
+	# $(eval LDFLAGS += $(LDFLAGS_RELEASE))
+	$(MAKE) build
 
 update-packages: tidy
 ## update-packages: Update the go packages to their latest version
@@ -66,6 +72,18 @@ test:
 ## test: Run all tests
 	go test -race -cover ./...
 
+
+release: DST_NAME = $(BIN_NAME)-$(GIT_COMMIT)
+release: DST_BASE_PATH = $(BASE_PATH)/releases/
+release: DST_DIR_PATH = $(DST_BASE_PATH)/$(DST_NAME)
+release: dependencies build-release
+	@echo ""
+	@echo "Packaging for release:"
+	mkdir -p $(DST_DIR_PATH)
+	cp --force $(BIN_PATH) $(DST_DIR_PATH)
+	cp --force $(DDCUTIL_BIN_PATH) $(DST_DIR_PATH)
+	rm -f "$(DST_BASE_PATH)/$(DST_NAME).zip"
+	zip --junk-paths -r $(DST_BASE_PATH)/$(DST_NAME).zip $(DST_DIR_PATH)
 
 help:
 ## help: This helpful list of commands

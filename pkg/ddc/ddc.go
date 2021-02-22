@@ -12,12 +12,11 @@ import (
 	"github.com/vampy/LinuxMonitorControl/pkg/xorg"
 )
 
-/*
-#cgo CFLAGS: -I./ddcutil/src/src/
-#cgo LDFLAGS: -L./ddcutil/lib -lddcutil -Wl,-rpath=./ddcutil/lib
-
-#include "ddcutil_c_api.h"
-*/
+// #cgo CFLAGS: -I./ddcutil/include/
+// #cgo LDFLAGS: -L./ddcutil/lib -lddcutil -Wl,-rpath=./ddcutil/lib
+//
+// #include "ddcutil_c_api.h"
+// import "C"
 
 // https://www.ddcutil.com/command_getvcp/
 type Value struct {

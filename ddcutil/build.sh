@@ -25,16 +25,22 @@ pushd "$SRC_DIR"
 if [[ -d "src/.libs" ]]; then
     make clean
 fi
-./configure --disable-drm --disable-shared --enable-static
+
+rm -rf "$DST_BIN_DIR"
+rm -rf "$DST_LIB_DIR"
+
+# TODO https://github.com/rockowitz/ddcutil/issues/183
+# --enable-static
+./configure --disable-drm --prefix="$SCRIPT_DIR"
 make -j 4
+make install
 popd
 
 
-echo -e "\n=== Copying === \n"
-rm -rf "$DST_BIN_DIR"
-mkdir -p "$DST_BIN_DIR"
-cp --verbose  "$SRC_DIR/src/ddcutil" "$DST_BIN_DIR/"
+# echo -e "\n=== Copying === \n"
+# mkdir -p "$DST_BIN_DIR"
+# cp --verbose  "$SRC_DIR/src/ddcutil" "$DST_BIN_DIR/"
 
-rm -rf "$DST_LIB_DIR"
-mkdir -p "$DST_LIB_DIR"
-cp --verbose --recursive --force "$SRC_DIR/src/.libs/." "$DST_LIB_DIR/"
+# Enable copying of static libs
+# mkdir -p "$DST_LIB_DIR"
+# cp --verbose --recursive --force "$SRC_DIR/src/.libs/." "$DST_LIB_DIR/"
